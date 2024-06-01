@@ -1,0 +1,71 @@
+{#include main.html}
+{#title}Quarkus Blogger CMS{/title}
+<div class="left-bar d-flex justify-content-between">
+    <div class="p-2">
+        <div class="mb-3 d-flex">
+            <a class="btn btn-outline-dark" href="{uri:Cms.newBlogEntry()}"><i class="bi bi-plus"></i> Post</a>
+        </div>
+
+        {#fragment id="blogEntries"}
+        <ul id="blogEntries" class="blogEntries list-group">
+            {#for blogEntry in blogEntries}
+
+              <li class="{#if blogEntry.id == currentBlogEntry.id??}active {/if}list-group-item blogEntry d-flex justify-content-between align-items-center" >
+                  <a href="{uri:Cms.editBlogEntry(blogEntry.id)}">{blogEntry.published}: {blogEntry.title}</a>
+                  <form action="{uri:Cms.deleteBlogEntry(blogEntry.id)}" method="post" onsubmit="return confirm('Do you really want to delete this blog post?');">
+                      {#authenticityToken/}
+                      <button class="btn blogEntry-delete"
+                      />
+                      <i class="bi bi-trash"></i>
+                      </button>
+                  </form>
+              </li>
+            {/for}
+        </ul>
+        {/fragment}
+    </div>
+    <div id="blog-editor" class="flex-grow-1 p-2">
+        {#if currentBlogEntry}
+            {#fragment id="blogEntryForm"}
+                <form action="{currentBlogEntry.id ? uri:Cms.saveBlogEntry(currentBlogEntry.id) : uri:Cms.saveNewBlogEntry()}" method="post" class="blogEntry-form">
+                    {#authenticityToken/}
+                    <div class="editor-wrapper">
+                        <div class="mb-3">
+                            <input name="title" class="form-control {#ifError 'title'}is-invalid{/}" value="{inject:flash.get('title') ?: currentBlogEntry.title}" placeholder="Enter new title" required/>
+                            {#ifError 'title'}
+                            <div class="invalid-feedback">
+                                Error: {#error 'title'/}
+                            </div>
+                            {/ifError}
+                        </div>
+                        <div class="mb-3">
+                            <input name="published" type="date" class="form-control {#ifError 'published'}is-invalid{/}" value="{inject:flash.get('published') ?: currentBlogEntry.published}" required/>
+                            {#ifError 'published'}
+                            <div class="invalid-feedback">
+                                Error: {#error 'title'/}
+                            </div>
+                            {/ifError}
+                        </div>
+                        <div class="mb-3">
+                          <input name="picture" class="form-control {#ifError 'picture'}is-invalid{/}" value="{inject:flash.get('picture') ?: currentBlogEntry.picture}" placeholder="Enter picture name" required/>
+                          {#ifError 'picture'}
+                          <div class="invalid-feedback">
+                            Error: {#error 'picture'/}
+                          </div>
+                          {/ifError}
+                        </div>
+                        <div class="mb-3">
+                            {#BlogEditor id="blogEntry-content" name="content" value=inject:flash.get('content').or(currentBlogEntry.content) /}
+                            {#ifError 'content'}
+                            <div class="invalid-feedback">
+                                Error: {#error 'content'/}
+                            </div>
+                            {/ifError}
+                        </div>
+                    </div>
+                    <button class="btn btn-primary">Save</button>
+                </form>
+            {/fragment}
+        {/if}
+    </div>
+</div>
